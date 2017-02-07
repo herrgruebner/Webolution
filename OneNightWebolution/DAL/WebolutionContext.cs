@@ -14,7 +14,7 @@ namespace OneNightWebolution.DAL
         {
 
         }
-        public DbSet<GameModels> Games { get; set; }
-        public DbSet<PlayerModels> Players { get; set; }
+        public DbSet<Game> Games { get; set; }
+        public DbSet<Player> Players { get; set; }
     }
 }

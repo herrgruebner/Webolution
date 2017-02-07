@@ -26,5 +26,11 @@ namespace OneNightWebolution.Controllers
 
             return View();
         }
+        public ActionResult Play()
+        {
+            ViewBag.Message = "Play webolution";
+
+            return View();
+        }
     }
 }

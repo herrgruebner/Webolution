@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "Play";
+}
+<script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+<script src="~/signalr/hubs"></script>
+<script src="~/Scripts/signalr.js"></script>
+<div id="playerName">Play</div>
+<div id="partyName"></div>
+
+<label>Party Name</label>
+<input type="text" id="partyname" />
+
+<label>Player Name</label>
+<input type="text" id="playerNameInput" />
+
+<input type="button" id="join" value="Join" />
+
+<input type="button" id="startbutton" value="Start Game" />
+<div id="otherplayers">
+
+</div>

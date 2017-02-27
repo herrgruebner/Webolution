@@ -54,9 +54,22 @@ namespace OneNightWebolution
             int numberTraitors = 3;
             int numberRebels = game.NumberPlayers;
             var group = Clients.Group(game.PartyName);
+            Random r = new Random();
             foreach (Player player in game.Players)
             {
                 // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
+                if(r.Next(1, numberTraitors + numberRebels) <= numberTraitors)
+                { // Player is traitor
+                    player.Role = "traitor";
+                    numberTraitors--;
+                }
+                else
+                {
+                    player.Role = "rebel";
+                    numberRebels--;
+                }
+
+                
             }
 
         }

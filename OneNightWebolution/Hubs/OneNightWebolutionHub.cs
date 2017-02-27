@@ -5,7 +5,7 @@ using OneNightWebolution.Models;
 using OneNightWebolution.DAL;
 using System.Linq;
 
-namespace SignalRChat
+namespace OneNightWebolution
 {
     public class OneNightWebolutionHub : Hub
     {
@@ -20,19 +20,45 @@ namespace SignalRChat
             // Call the addNewMessageToPage method to update clients.
             Clients.All.addNewMessageToPage(name, message);
         }
-        public void AddPlayerToParty(string playerName, string partyName)
+
+        public async void AddPlayerToParty(string playerName, string partyName)
         {
             Player player = new Player(playerName);
+            await Groups.Add(Context.ConnectionId, partyName);
             db.Players.Add(player);
 
             Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
             if (game == null)
             {
                 game = new Game() { PartyName = partyName };
+                db.Games.Add(game);
                 Clients.Caller.ShowStartButton();
             }
+            SetPartyAndPlayerNameAndID(partyName, playerName, game.ID, player.ID);
             game.AddPlayer(player);
-            Clients.All.ShowOtherPlayer(playerName);
+            Clients.Group(partyName).ShowOtherPlayer(playerName);
+            db.SaveChanges();
+        }
+
+        public void SetPartyAndPlayerNameAndID(string partyName, string playerName, int partyID, int gameID)
+        {
+            Clients.Caller.ShowPlayerName(playerName);
+            Clients.Caller.ShowPartyName(partyName);
+            Clients.Caller.SetPlayerID(gameID);
+            Clients.Caller.SetPartyID(partyID);
+        }
+
+        public async void BeginGame(int gameID)
+        {
+            Game game = db.Games.First(s => s.ID == gameID);
+            int numberTraitors = 3;
+            int numberRebels = game.NumberPlayers;
+        }
+
+        public int GetNumberTraitors(int numberPlayers)
+        {
+
+            return 0;
         }
     }
 }

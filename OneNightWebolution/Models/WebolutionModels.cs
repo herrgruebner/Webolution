@@ -8,13 +8,19 @@ namespace OneNightWebolution.Models
 {
     class Game
     {
+        public Game()
+        {
+            Players = new List<Player>();
+            NumberPlayers = 0;
+        }
         public int ID { get; set; }
         public string PartyName { get; set; }
         public int NumberPlayers { get; set; }
-        public virtual ICollection<Player> Players { get; set; }
+        public virtual List<Player> Players { get; set; }
         public void AddPlayer(Player player)
         {
-            this.Players.Add(player);
+            Players.Add(player);
+            NumberPlayers += 1;
         }
     }
     class Player
@@ -27,7 +33,7 @@ namespace OneNightWebolution.Models
         public virtual Game Game { get; set; }
         public Player(string playerName)
         {
-            this.Name = playerName;
+            Name = playerName;
         }
     }
 }

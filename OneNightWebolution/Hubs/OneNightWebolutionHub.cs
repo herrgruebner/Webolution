@@ -75,7 +75,7 @@ namespace OneNightWebolution
                 }
 
                 int rand  = r.Next(1, totalSpecialisationCards);
-                int i = totalSpecialisationCards;
+                int i = rand;
 
                 foreach (int current in specialisationAmounts)
                 {

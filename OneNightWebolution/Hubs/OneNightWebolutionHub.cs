@@ -58,7 +58,6 @@ namespace OneNightWebolution
             {
                 // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
             }
-
         }
 
         public void ShowRole(string connectionID, bool IsTraitor)

@@ -84,6 +84,7 @@ namespace OneNightWebolution
                     {
                         player.Specialist = specialisations[current];
                         specialisationAmounts[current]--;
+                        break;
                     }
                 }
 

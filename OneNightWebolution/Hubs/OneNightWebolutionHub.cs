@@ -75,13 +75,12 @@ namespace OneNightWebolution
                 }
 
                 int rand  = r.Next(1, totalSpecialisationCards);
-                int i = rand;
 
                 foreach (int current in specialisationAmounts)
                 {
-                    i -= specialisationAmounts[current];
+                    rand -= specialisationAmounts[current];
 
-                    if(i <= 0)
+                    if(rand <= 0)
                     {
                         player.Specialist = specialisations[current];
                         specialisationAmounts[current]--;

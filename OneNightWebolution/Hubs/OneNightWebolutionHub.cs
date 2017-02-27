@@ -69,7 +69,6 @@ namespace OneNightWebolution
                     numberRebels--;
                 }
 
-                
             }
             game.NumberTraitors = numberTraitors;
         }

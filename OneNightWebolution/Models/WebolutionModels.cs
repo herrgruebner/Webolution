@@ -26,14 +26,16 @@ namespace OneNightWebolution.Models
     class Player
     {
         public int ID { get; set; }
+        public string ConnectionID { get; set; }
         public string Name { get; set; }
         public string Role { get; set; }
         public string Specialist { get; set; }
         public int GameID { get; set; }
         public virtual Game Game { get; set; }
-        public Player(string playerName)
+        public Player(string playerName, string connectionID)
         {
             Name = playerName;
+            ConnectionID = connectionID;
         }
     }
 }

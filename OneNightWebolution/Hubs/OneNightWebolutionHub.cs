@@ -23,7 +23,7 @@ namespace OneNightWebolution
 
         public async void AddPlayerToParty(string playerName, string partyName)
         {
-            Player player = new Player(playerName);
+            Player player = new Player(playerName, Context.ConnectionId);
             await Groups.Add(Context.ConnectionId, partyName);
             db.Players.Add(player);
 
@@ -53,12 +53,14 @@ namespace OneNightWebolution
             Game game = db.Games.First(s => s.ID == gameID);
             int numberTraitors = 3;
             int numberRebels = game.NumberPlayers;
+            var group = Clients.Group(game.PartyName);
+            foreach (Player player in game.Players)
+            {
+                // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
+            }
+
         }
 
-        public int GetNumberTraitors(int numberPlayers)
-        {
-
-            return 0;
-        }
     }
+
 }

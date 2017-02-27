@@ -87,6 +87,7 @@ namespace OneNightWebolution
                         player.Specialist = specialisations[current];
                         specialisationAmounts[current]--;
                         ShowSpecialist(player.ConnectionID, player.Specialist);
+                        break;
                     }
                 }
 

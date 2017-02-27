@@ -67,14 +67,16 @@ namespace OneNightWebolution
                 { // Player is traitor
                     player.Role = "traitor";
                     numberTraitors--;
+                    ShowRole(player.ConnectionID, true);
                 }
                 else
                 {
                     player.Role = "rebel";
                     numberRebels--;
+                    ShowRole(player.ConnectionID, false);
                 }
 
-                int rand  = r.Next(1,totalRoleCards);
+                int rand  = r.Next(1, totalRoleCards);
                 int i = totalRoleCards;
 
                 foreach (int currentRole in roleAmounts)
@@ -85,18 +87,27 @@ namespace OneNightWebolution
                     {
                         player.Specialist = roles[currentRole];
                         roleAmounts[currentRole]--;
+                        ShowSpecialist(player.ConnectionID, player.Specialist);
                     }
                 }
             }
 
             game.NumberTraitors = numberTraitors;
         }
-
+        /// <summary>
+        /// Shows the role (traitor/rebel) on the client page
+        /// </summary>
+        /// <param name="connectionID"></param>
+        /// <param name="IsTraitor"></param>
         public void ShowRole(string connectionID, bool IsTraitor)
         {
             Clients.Client(connectionID).ShowRole(IsTraitor);
         }
-
+        /// <summary>
+        /// Shows the assigned specialist on the client page
+        /// </summary>
+        /// <param name="connectionID"></param>
+        /// <param name="specialist"></param>
         public void ShowSpecialist(string connectionID, string specialist)
         {
             Clients.Client(connectionID).ShowSpecialist(specialist);

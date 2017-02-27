@@ -56,9 +56,9 @@ namespace OneNightWebolution
             var group = Clients.Group(game.PartyName);
 
             Random r = new Random();
-            string[] roles = new string[7] {"investigator","signaller","thief","reassigner","analyst","confirmer","revealer"};
-            int[] roleAmounts = new int[7] { 2, 2, 2, 2, 2, 2, 2 };
-            int totalRoleCards = 14;
+            string[] specialisations = new string[7] {"investigator","signaller","thief","reassigner","analyst","confirmer","revealer"};
+            int[] specialisationAmounts = new int[7] { 2, 2, 2, 2, 2, 2, 2 };
+            int totalSpecialisationCards = 14;
 
             foreach (Player player in game.Players)
             {
@@ -74,17 +74,17 @@ namespace OneNightWebolution
                     numberRebels--;
                 }
 
-                int rand  = r.Next(1,totalRoleCards);
-                int i = totalRoleCards;
+                int rand  = r.Next(1, totalSpecialisationCards);
+                int i = totalSpecialisationCards;
 
-                foreach (int currentRole in roleAmounts)
+                foreach (int currentRole in specialisationAmounts)
                 {
-                    i -= roleAmounts[currentRole];
+                    i -= specialisationAmounts[currentRole];
 
                     if(i <= 0)
                     {
-                        player.Specialist = roles[currentRole];
-                        roleAmounts[currentRole]--;
+                        player.Specialist = specialisations[currentRole];
+                        specialisationAmounts[currentRole]--;
                     }
                 }
             }

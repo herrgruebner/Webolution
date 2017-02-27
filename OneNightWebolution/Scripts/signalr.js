@@ -36,6 +36,18 @@ hub.client.setPartyID = function (gameID) {
     $('#gameid').text(gameID);
 }
 
+hub.client.showID = function (isTraitor) {
+    if (isTraitor) {
+        $('#rolebox').text("Traitor");
+    }
+    else {
+        $('#rolebox').text("Rebel");
+    }
+}
+hub.client.showSpecialist = function (specialist) {
+    $('#specialist').text(specialist);
+}
+
 getPlayerID = function () {
     return $('#playerid').text();
 };

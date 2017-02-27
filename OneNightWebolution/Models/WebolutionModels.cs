@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNet.SignalR;
+
 
 namespace OneNightWebolution.Models
 {
@@ -37,5 +39,6 @@ namespace OneNightWebolution.Models
             Name = playerName;
             ConnectionID = connectionID;
         }
+        
     }
 }

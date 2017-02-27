@@ -61,6 +61,16 @@ namespace OneNightWebolution
 
         }
 
+        public void ShowRole(string connectionID, bool IsTraitor)
+        {
+            Clients.Client(connectionID).ShowRole(IsTraitor);
+        }
+
+        public void ShowSpecialist(string connectionID, string specialist)
+        {
+            Clients.Client(connectionID).ShowSpecialist(specialist);
+        }
+
     }
 
 }

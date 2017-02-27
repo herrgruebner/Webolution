@@ -54,7 +54,12 @@ namespace OneNightWebolution
             int numberTraitors = 3;
             int numberRebels = game.NumberPlayers;
             var group = Clients.Group(game.PartyName);
+
             Random r = new Random();
+            string[] roles = new string[7] {"investigator","signaller","thief","reassigner","analyst","confirmer","revealer"};
+            int[] roleAmounts = new int[7] { 2, 2, 2, 2, 2, 2, 2 };
+            int totalRoleCards = 14;
+
             foreach (Player player in game.Players)
             {
                 // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
@@ -69,7 +74,19 @@ namespace OneNightWebolution
                     numberRebels--;
                 }
 
-                
+                int rand  = r.Next(1,totalRoleCards);
+                int i = totalRoleCards;
+
+                foreach (int currentRole in roleAmounts)
+                {
+                    i -= roleAmounts[currentRole];
+
+                    if(i <= 0)
+                    {
+                        player.Specialist = roles[currentRole];
+                        roleAmounts[currentRole]--;
+                    }
+                }
             }
         }
 

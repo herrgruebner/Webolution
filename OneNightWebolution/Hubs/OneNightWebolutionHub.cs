@@ -87,6 +87,8 @@ namespace OneNightWebolution
                         specialisationAmounts[current]--;
                     }
                 }
+
+                totalSpecialisationCards--;
             }
 
             game.NumberTraitors = numberTraitors;

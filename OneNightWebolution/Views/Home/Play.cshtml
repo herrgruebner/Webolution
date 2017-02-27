@@ -10,35 +10,39 @@
 <div id="gameid" class="hidden"></div>
 
 <div class="row">
-    <div id="partyName"></div>
+    <div id="partyName" class="col-md-12"></div>
 </div>
 
 <div class="row">
-    <div id="playerName">Play</div>
+    <div id="playerName" class="col-md-12">Play</div>
 </div>
 
 <div class="row">
-    <div id="rolebox"></div>
-    <div id="specialist"></div>
+    <div id="rolebox" class="col-md-12"></div>
+    <div id="specialist" class="col-md-12"></div>
 </div>
-
-<div class="row">
-    <label>Party Name</label>
-    <input type="text" id="partyname" />
-</div>
-
-<div class="row">
-    <label>Player Name</label>
-    <input type="text" id="playerNameInput" />
-</div>
-<div class="row">
-    <input type="button" id="join" value="Join" />
-
-    <input type="button" id="startbutton" value="Start Game" />
-</div>
-
-<div class="row">
-    <div id="otherplayers">
-
+<div class="form-group">
+    <div class="row">
+        <label>Party Name</label>
+        <input type="text" id="partyname" class="form-control" />
     </div>
 </div>
+
+<div class="form-group">
+    <div class="row">
+        <label>Player Name</label>
+        <input type="text" id="playerNameInput" class="form-control" />
+    </div>
+</div>
+    
+    <div class="row">
+        <input type="button" id="join" value="Join" class="btn btn-default" />
+
+        <input type="button" id="startbutton" class="hidden" class="btn btn-success" value="Start Game" />
+    </div>
+
+    <div class="row">
+        <div id="otherplayers">
+
+        </div>
+    </div>

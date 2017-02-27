@@ -71,6 +71,7 @@ namespace OneNightWebolution
 
                 
             }
+            game.NumberTraitors = numberTraitors;
         }
 
         public void ShowRole(string connectionID, bool IsTraitor)

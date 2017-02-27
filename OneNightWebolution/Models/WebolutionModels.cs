@@ -18,6 +18,7 @@ namespace OneNightWebolution.Models
         public int ID { get; set; }
         public string PartyName { get; set; }
         public int NumberPlayers { get; set; }
+        public int NumberTraitors { get; set; }
         public virtual List<Player> Players { get; set; }
         public void AddPlayer(Player player)
         {

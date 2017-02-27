@@ -5,28 +5,44 @@
 <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
 <script src="~/signalr/hubs"></script>
 <script src="~/Scripts/signalr.js"></script>
-<div class="row">
-    <div id="playerName">Play</div>
-
-</div>
-<div class="row">
-    <div id="rolebox"></div>
-    <div id="specialist"></div>
-</div>
-
-<div id="partyName"></div>
+<!--These hidden fields are used to store ids for signalr-->
 <div id="playerid" class="hidden"></div>
 <div id="gameid" class="hidden"></div>
 
-<label>Party Name</label>
-<input type="text" id="partyname" />
-
-<label>Player Name</label>
-<input type="text" id="playerNameInput" />
-
-<input type="button" id="join" value="Join" />
-
-<input type="button" id="startbutton" value="Start Game" />
-<div id="otherplayers">
-
+<div class="row">
+    <div id="partyName" class="col-md-12"></div>
 </div>
+
+<div class="row">
+    <div id="playerName" class="col-md-12">Play</div>
+</div>
+
+<div class="row">
+    <div id="rolebox" class="col-md-12"></div>
+    <div id="specialist" class="col-md-12"></div>
+</div>
+<div class="form-group">
+    <div class="row">
+        <label>Party Name</label>
+        <input type="text" id="partyname" class="form-control" />
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="row">
+        <label>Player Name</label>
+        <input type="text" id="playerNameInput" class="form-control" />
+    </div>
+</div>
+    
+    <div class="row">
+        <input type="button" id="join" value="Join" class="btn btn-default" />
+
+        <input type="button" id="startbutton" class="hidden" class="btn btn-success" value="Start Game" />
+    </div>
+
+    <div class="row">
+        <div id="otherplayers">
+
+        </div>
+    </div>

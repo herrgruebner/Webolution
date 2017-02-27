@@ -76,7 +76,12 @@ namespace OneNightWebolution
                     ShowRole(player.ConnectionID, false);
                 }
 
+<<<<<<< HEAD
+                int rand  = r.Next(1, totalRoleCards);
+                int i = totalRoleCards;
+=======
                 int rand  = r.Next(1, totalSpecialisationCards);
+>>>>>>> 4d2d051ba206d836acc177a54c32ae1290dec494
 
                 foreach (int current in specialisationAmounts)
                 {
@@ -84,9 +89,14 @@ namespace OneNightWebolution
 
                     if(rand <= 0)
                     {
+<<<<<<< HEAD
+                        player.Specialist = roles[currentRole];
+                        roleAmounts[currentRole]--;
+                        ShowSpecialist(player.ConnectionID, player.Specialist);
+=======
                         player.Specialist = specialisations[current];
                         specialisationAmounts[current]--;
-                        ShowSpecialist(player.ConnectionID, player.Specialist);
+>>>>>>> 4d2d051ba206d836acc177a54c32ae1290dec494
                     }
                 }
 

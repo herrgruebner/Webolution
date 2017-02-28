@@ -8,7 +8,7 @@ using Microsoft.AspNet.SignalR;
 
 namespace OneNightWebolution.Models
 {
-    class Game
+    public class Game
     {
         public Game()
         {
@@ -26,7 +26,7 @@ namespace OneNightWebolution.Models
             NumberPlayers += 1;
         }
     }
-    class Player
+    public class Player
     {
         public int ID { get; set; }
         public string ConnectionID { get; set; }

@@ -154,6 +154,7 @@
     <Compile Include="DAL\WebolutionContext.cs" />
     <Compile Include="Hubs\OneNightWebolutionHub.cs" />
     <Compile Include="Models\WebolutionModels.cs" />
+    <Compile Include="Repositories\PlayerRepository.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">

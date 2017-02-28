@@ -4,12 +4,14 @@ using Microsoft.AspNet.SignalR;
 using OneNightWebolution.Models;
 using OneNightWebolution.DAL;
 using System.Linq;
+using OneNightWebolution.Repositories;
 
 namespace OneNightWebolution
 {
     public class OneNightWebolutionHub : Hub
     {
         private WebolutionContext db;
+        private PlayerRepository pRepo;
         public OneNightWebolutionHub()
         {
             this.db = new WebolutionContext();
@@ -25,7 +27,7 @@ namespace OneNightWebolution
         {
             Player player = new Player(playerName, Context.ConnectionId);
             await Groups.Add(Context.ConnectionId, partyName);
-            db.Players.Add(player);
+            pRepo.Add(player);
 
             Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
             if (game == null)
@@ -34,13 +36,20 @@ namespace OneNightWebolution
                 db.Games.Add(game);
                 Clients.Caller.ShowStartButton();
             }
-            SetPartyAndPlayerNameAndID(partyName, playerName, game.ID, player.ID);
+            ShowPartyAndPlayerNameAndID(partyName, playerName, game.ID, player.ID);
             game.AddPlayer(player);
             Clients.Group(partyName).ShowOtherPlayer(playerName);
             db.SaveChanges();
         }
 
-        public void SetPartyAndPlayerNameAndID(string partyName, string playerName, int partyID, int gameID)
+        /// <summary>
+        /// Shows the party name and player name and sets the IDs on the client page
+        /// </summary>
+        /// <param name="partyName"></param>
+        /// <param name="playerName"></param>
+        /// <param name="partyID"></param>
+        /// <param name="gameID"></param>
+        public void ShowPartyAndPlayerNameAndID(string partyName, string playerName, int partyID, int gameID)
         {
             Clients.Caller.ShowPlayerName(playerName);
             Clients.Caller.ShowPartyName(partyName);
@@ -68,12 +77,16 @@ namespace OneNightWebolution
                     player.Role = "traitor";
                     numberTraitors--;
                     ShowRole(player.ConnectionID, true);
+                    pRepo.SavePlayerChanges(player);
+
                 }
                 else
                 {
                     player.Role = "rebel";
                     numberRebels--;
                     ShowRole(player.ConnectionID, false);
+                    pRepo.SavePlayerChanges(player);
+
                 }
 
                 int rand  = r.Next(1, totalSpecialisationCards);
@@ -87,6 +100,7 @@ namespace OneNightWebolution
                         player.Specialist = specialisations[current];
                         specialisationAmounts[current]--;
                         ShowSpecialist(player.ConnectionID, player.Specialist);
+                        pRepo.SavePlayerChanges(player);
                     }
                 }
 

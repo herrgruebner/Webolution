@@ -5,6 +5,7 @@ using OneNightWebolution.Models;
 using OneNightWebolution.DAL;
 using System.Linq;
 using OneNightWebolution.Repositories;
+using System.Collections.Generic;
 
 namespace OneNightWebolution
 {
@@ -38,7 +39,7 @@ namespace OneNightWebolution
             }
             ShowPartyAndPlayerNameAndID(partyName, playerName, game.ID, player.ID);
             game.AddPlayer(player);
-            Clients.Group(partyName).ShowOtherPlayer(playerName);
+            Clients.Group(partyName).ShowOtherPlayer(playerName, player.ID);
             db.SaveChanges();
         }
 
@@ -60,25 +61,60 @@ namespace OneNightWebolution
         public async void BeginGame(int gameID)
         {
             Game game = db.Games.First(s => s.ID == gameID);
+            AssignRolesAndSpecialists(game);
+            var group = Clients.Group(game.PartyName);
+            Clients.Group(game.PartyName).ShowGameBegun();
+            Clients.Client(game.Players.FirstOrDefault().ConnectionID).TakeTurn();
+            ShowTraitorsToTraitors(game);
+            
+        }
+        public void ShowTraitorsToTraitors(Game game)
+        {
+            Dictionary<int, string> idConnectionDict = new Dictionary<int, string>();
+            List<string> connections = new List<string>();
+            List<int> ids = new List<int>();
+            List<Player> traitors = new List<Player>();
+            foreach (Player player in game.Players)
+            {
+                if (player.Role == "traitor")
+                {
+                    traitors.Add(player);
+                }
+            }
+            foreach (Player playerToReveal in traitors)
+            {
+                foreach (Player playerToUpdate in traitors)
+                {
+                    ShowAsTraitor(playerToReveal.ID, playerToUpdate.ConnectionID);
+                }
+            }
+        }
+        private void AssignRolesAndSpecialists(Game game)
+        {
             int numberTraitors = 3;
             int numberRebels = game.NumberPlayers;
             var group = Clients.Group(game.PartyName);
 
             Random r = new Random();
-            string[] specialisations = new string[7] {"investigator","signaller","thief","reassigner","analyst","confirmer","revealer"};
-            int[] specialisationAmounts = new int[7] { 2, 2, 2, 2, 2, 2, 2 };
-            int totalSpecialisationCards = 14;
+            string[] specialisations = new string[7] { "investigator", "signaller", "thief", "reassigner", "analyst", "confirmer", "revealer" };
+            Dictionary<string, int> specialisationDict = new Dictionary<string, int>() {
+                { "investigator", 2 }, { "signaller", 2 },
+                {"thief", 2 }, { "reassigner", 2 },
+                {"analyst",2 }, {"confirmer", 2},
+                {"revealer", 2 }
+            };
+            //int totalSpecialisationCards = 14;
+            //int[] specialisationAmounts = new int[7] { 2, 2, 2, 2, 2, 2, 2 };
 
             foreach (Player player in game.Players)
             {
                 // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
-                if(r.Next(1, numberTraitors + numberRebels) <= numberTraitors)
+                if (r.Next(1, numberTraitors + numberRebels) <= numberTraitors)
                 { // Player is traitor
                     player.Role = "traitor";
                     numberTraitors--;
                     ShowRole(player.ConnectionID, true);
                     pRepo.SavePlayerChanges(player);
-
                 }
                 else
                 {
@@ -86,15 +122,12 @@ namespace OneNightWebolution
                     numberRebels--;
                     ShowRole(player.ConnectionID, false);
                     pRepo.SavePlayerChanges(player);
-
                 }
 
-                int rand  = r.Next(1, totalSpecialisationCards);
-
+                /*int rand  = r.Next(1, totalSpecialisationCards);
                 foreach (int current in specialisationAmounts)
                 {
                     rand -= specialisationAmounts[current];
-
                     if(rand <= 0)
                     {
                         player.Specialist = specialisations[current];
@@ -102,13 +135,27 @@ namespace OneNightWebolution
                         ShowSpecialist(player.ConnectionID, player.Specialist);
                         pRepo.SavePlayerChanges(player);
                     }
+                }*/
+                string randSpecialisation = specialisations[r.Next(0, specialisations.Length)];
+                if (specialisationDict[randSpecialisation] > 0)
+                {
+                    player.Specialist = randSpecialisation;
+                    specialisationDict[randSpecialisation] -= 1;
+                    ShowSpecialist(player.ConnectionID, player.Specialist);
+                    pRepo.SavePlayerChanges(player);
                 }
 
-                totalSpecialisationCards--;
+                //totalSpecialisationCards--;
             }
 
             game.NumberTraitors = numberTraitors;
         }
+
+        public void ShowAsTraitor(int playerID, string connectionID)
+        {
+            Clients.Client(connectionID).ShowOtherRole(playerID, "traitor");
+        }
+
         /// <summary>
         /// Shows the role (traitor/rebel) on the client page
         /// </summary>

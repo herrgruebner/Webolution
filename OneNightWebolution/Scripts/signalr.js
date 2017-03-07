@@ -63,13 +63,13 @@ hub.client.takeTurn = function () {
     var singleActionSpecialists = ["investigator", "signaller", "thief", "analyst", "confirmer", "revealer"];
     
     if (getPlayerSpecialist() in singleActionSpecialists) {
+        $('#otherplayercontainer').on('click', function () {
+            var selectedID = $(this).attr('id');
 
+            hub.server.takeSingleAction(getPlayerID(), getPlayerSpecialist(), selectedID);
+        });
     };
-    $('#otherplayercontainer').on('click', function () {
-        var selectedID = $(this).attr('id');
-        
-        hub.server.takeSingleAction(getPlayerID(), getPlayerSpecialist(), selectedID);
-    });
+    
 };
 
 getPlayerID = function () {

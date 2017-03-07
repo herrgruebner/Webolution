@@ -24,6 +24,11 @@ namespace OneNightWebolution
             Clients.All.addNewMessageToPage(name, message);
         }
 
+        /// <summary>
+        /// Associates a player with a game/partyname, creates if non existing.
+        /// </summary>
+        /// <param name="playerName"></param>
+        /// <param name="partyName"></param>
         public async void AddPlayerToParty(string playerName, string partyName)
         {
             Player player = new Player(playerName, Context.ConnectionId);
@@ -57,9 +62,13 @@ namespace OneNightWebolution
             Clients.Caller.SetPlayerID(gameID);
             Clients.Caller.SetPartyID(partyID);
         }
-
+        /// <summary>
+        /// Called from party leader client side, locks adding players and begins the game.
+        /// </summary>
+        /// <param name="gameID"></param>
         public async void BeginGame(int gameID)
         {
+            // Todo: add a game started lock.
             Game game = db.Games.First(s => s.ID == gameID);
             AssignRolesAndSpecialists(game);
             var group = Clients.Group(game.PartyName);
@@ -68,6 +77,10 @@ namespace OneNightWebolution
             ShowTraitorsToTraitors(game);
             
         }
+        /// <summary>
+        /// At the start of a round, reveals all traitors to the other traitors.
+        /// </summary>
+        /// <param name="game"></param>
         public void ShowTraitorsToTraitors(Game game)
         {
             Dictionary<int, string> idConnectionDict = new Dictionary<int, string>();
@@ -89,6 +102,10 @@ namespace OneNightWebolution
                 }
             }
         }
+        /// <summary>
+        /// Assigns roles and specialists randomly to each player, updates database.
+        /// </summary>
+        /// <param name="game"></param>
         private void AssignRolesAndSpecialists(Game game)
         {
             int numberTraitors = 3;
@@ -150,7 +167,32 @@ namespace OneNightWebolution
 
             game.NumberTraitors = numberTraitors;
         }
+        public void TakeSingleAction(int playerID, string specialist, int selectedID)
+        {
+            Player actingPlayer = pRepo.Get(playerID);
+            if (actingPlayer.Specialist != specialist)
+            {
+                return;
+            }
+            /*switch (specialist)
+            {
+                "investigator";
+                     , 
+                    case "signaller", 
+                    case: "thief", 
+                    case: "analyst", 
+                    case: "confirmer", 
+                    case: "revealer"
+                default:
+            }*/
+        }
 
+        /// <summary>
+        /// For specified connection, reveals player role identified by playerID as a traitor.
+        /// Used for showing fellow traitors.
+        /// </summary>
+        /// <param name="playerID"></param>
+        /// <param name="connectionID"></param>
         public void ShowAsTraitor(int playerID, string connectionID)
         {
             Clients.Client(connectionID).ShowOtherRole(playerID, "traitor");

@@ -50,12 +50,16 @@ hub.client.showSpecialist = function (specialist) {
     $('#specialist').text(specialist);
 };
 
+hub.client.showSpecialist = function (specialist, playerID) {
+    $('#playerID').find('.specialist').text(specialist);
+};
+
 hub.client.showGameBegun = function () {
     $('#gamestate').text("Game begun");
 };
 
 hub.client.showOtherRole = function (playerID, role) {
-    $('#playerID').find('#role').text(role);
+    $('#playerID').find('.role').text(role);
 }
 
 hub.client.takeTurn = function () {

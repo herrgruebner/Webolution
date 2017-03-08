@@ -13,6 +13,15 @@ namespace OneNightWebolution
     {
         private WebolutionContext db;
         private PlayerRepository pRepo;
+
+        private string rebel = "rebel";
+        private string traitor = "traitor";
+
+        private string investigator = "investigator";
+        private string thief = "thief";
+        public string analyst = "analyst";
+        public string confirmer = "confirmer";
+        public string revealer = "revealer";
         public OneNightWebolutionHub()
         {
             this.db = new WebolutionContext();
@@ -89,7 +98,7 @@ namespace OneNightWebolution
             List<Player> traitors = new List<Player>();
             foreach (Player player in game.Players)
             {
-                if (player.Role == "traitor")
+                if (player.Role == traitor)
                 {
                     traitors.Add(player);
                 }
@@ -128,14 +137,14 @@ namespace OneNightWebolution
                 // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
                 if (r.Next(1, numberTraitors + numberRebels) <= numberTraitors)
                 { // Player is traitor
-                    player.Role = "traitor";
+                    player.Role = traitor;
                     numberTraitors--;
                     ShowRole(player.ConnectionID, true);
                     pRepo.SavePlayerChanges(player);
                 }
                 else
                 {
-                    player.Role = "rebel";
+                    player.Role = rebel;
                     numberRebels--;
                     ShowRole(player.ConnectionID, false);
                     pRepo.SavePlayerChanges(player);
@@ -170,13 +179,53 @@ namespace OneNightWebolution
         public void TakeSingleAction(int playerID, string specialist, int selectedID)
         {
             Player actingPlayer = pRepo.Get(playerID);
+            Player selectedPlayer = pRepo.Get(selectedID);
             if (actingPlayer.Specialist != specialist)
             {
                 return;
             }
+            
+            if (specialist == investigator)
+            {
+                if (selectedPlayer.Role == traitor)
+                {
+                    ShowAsTraitor(selectedID, Context.ConnectionId);
+                }
+                else
+                {
+                    ShowAsRebel(selectedID, Context.ConnectionId);
+                }
+            }
+            else if (specialist == thief)
+            {
+                if (actingPlayer.Role == rebel)
+                {
+                    SwapPlayerRoles(actingPlayer, selectedPlayer);
+                }
+            }
+            else if (specialist == analyst)
+            {
+                ShowSpecialist(Context.ConnectionId, selectedPlayer.Specialist, selectedPlayer.ID);
+            }
+            else if (specialist == confirmer)
+            {
+                if (actingPlayer.Role == traitor)
+                {
+                    ShowRole(Context.ConnectionId, true);
+                }
+                else
+                {
+                    ShowRole(Context.ConnectionId, false);
+                }
+            }
+            else if (specialist == revealer)
+            {
+
+            }
             /*switch (specialist)
             {
                 "investigator";
+                if prepo.
                      , 
                     case "signaller", 
                     case: "thief", 
@@ -185,6 +234,19 @@ namespace OneNightWebolution
                     case: "revealer"
                 default:
             }*/
+        }
+        /// <summary>
+        /// Swaps two player's roles and updates the database
+        /// </summary>
+        /// <param name="actingPlayer"></param>
+        /// <param name="selectedPlayer"></param>
+        private void SwapPlayerRoles(Player actingPlayer, Player selectedPlayer)
+        {
+            string roleToSwap = actingPlayer.Role;
+            actingPlayer.Role = selectedPlayer.Role;
+            selectedPlayer.Role = roleToSwap;
+            pRepo.SavePlayerChanges(actingPlayer);
+            pRepo.SavePlayerChanges(selectedPlayer);
         }
 
         /// <summary>
@@ -195,7 +257,16 @@ namespace OneNightWebolution
         /// <param name="connectionID"></param>
         public void ShowAsTraitor(int playerID, string connectionID)
         {
-            Clients.Client(connectionID).ShowOtherRole(playerID, "traitor");
+            Clients.Client(connectionID).ShowOtherRole(playerID, traitor);
+        }
+        /// <summary>
+        /// For specified connection, reveals player's (identified by playerID) role as a traitor. 
+        /// </summary>
+        /// <param name="playerID"></param>
+        /// <param name="connectionID"></param>
+        public void ShowAsRebel(int playerID, string connectionID)
+        {
+            Clients.Client(connectionID).ShowOtherRole(playerID, rebel);
         }
 
         /// <summary>
@@ -207,6 +278,7 @@ namespace OneNightWebolution
         {
             Clients.Client(connectionID).ShowRole(IsTraitor);
         }
+
         /// <summary>
         /// Shows the assigned specialist on the client page
         /// </summary>
@@ -215,6 +287,10 @@ namespace OneNightWebolution
         public void ShowSpecialist(string connectionID, string specialist)
         {
             Clients.Client(connectionID).ShowSpecialist(specialist);
+        }
+        public void ShowSpecialist(string connectionID, string specialist, int playerID)
+        {
+            Clients.Client(connectionID).ShowSpecialist(specialist, playerID);
         }
 
     }

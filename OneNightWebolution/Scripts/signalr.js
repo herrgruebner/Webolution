@@ -2,7 +2,7 @@
 
 $.connection.hub.start().done(function () {
     $('#join').click(function () {
-        hub.server.addPlayerToParty($('#playerNameInput').val(), $('#partyname').val());
+        hub.server.addPlayerToParty($('#playerNameInput').val(), $('#partynameinput').val());
 
     });
 
@@ -64,17 +64,63 @@ hub.client.showOtherRole = function (playerID, role) {
 
 hub.client.takeTurn = function () {
     $('#gamestate').text("Your Turn");
-    var singleActionSpecialists = ["investigator", "signaller", "thief", "analyst", "confirmer", "revealer"];
+    var singleClickSpecialists = ["investigator", "thief", "analyst", "confirmer", "revealer"];
+    var multiClickSpecialists = ["reassinger", "signaller"];
     
-    if (getPlayerSpecialist() in singleActionSpecialists) {
-        $('#otherplayercontainer').on('click', function () {
+    if (getPlayerSpecialist() in singleClickSpecialists) {
+        $('.otherplayercontainer').on('click', function () {
             var selectedID = $(this).attr('id');
 
             hub.server.takeSingleAction(getPlayerID(), getPlayerSpecialist(), selectedID);
         });
-    };
-    
+    }
+    else if (getPlayerSpecialist() == "signaller") {
+        if (getplayerRole() == "rebel") {
+            $('.otherplayercontainer').on('click', function () {
+                var selectedID = $(this).attr('id');
+
+                hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
+            });
+        }
+        else {
+            rolecontainers = $('.role')
+            for (role in rolecontainers) {
+                if ($(role).text() == "rebel") {
+                    $(role).parent().on('click', function () {
+                        var selectedID = $(this).attr('id');
+
+                        hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
+                    });
+                }
+            }
+        }
+    }
+    else if (getPlayerSpecialist == "reassigner") {
+        $('#takeactionbutton').removeClass('hidden');
+        var swapIDArray = [];
+
+        $('.otherplayercontainer').on('click', function () {
+            swapIDArray.push($(this).attr('id'));
+            this.setAttribute("class", "otherplayercontainer selectedplayer")
+            if (getPlayerRole == "rebel") {
+                if (swapIDArray.length == 2) {
+                    hub.server.takeReassignAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0], swapIDArray[1]);
+                }
+            }
+            else {
+                hub.server.takeReassignAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0], swapIDArray[1])
+            }
+        });
+    }
 };
+
+hub.client.showTapMessage = function (name) {
+    $('#message').text('someone tapped you');
+};
+
+hub.client.showFullTraitorsMessage = function () {
+    $('#message').text('Already full of traitors');
+}
 
 getPlayerID = function () {
     return $('#playerid').text();
@@ -82,4 +128,12 @@ getPlayerID = function () {
 
 getPlayerSpecialist = function (){
     return $('#specialist').text();
-}
+};
+
+getPlayerRole = function () {
+    return $('#rolebox').text();
+};
+
+getPartyName = function () {
+    return $('#partyName').text();
+};

@@ -17,11 +17,13 @@ namespace OneNightWebolution
         private string rebel = "rebel";
         private string traitor = "traitor";
 
-        private string investigator = "investigator";
-        private string thief = "thief";
-        public string analyst = "analyst";
-        public string confirmer = "confirmer";
-        public string revealer = "revealer";
+        private const string investigator = "investigator";
+        private const string thief = "thief";
+        private const string analyst = "analyst";
+        private const string confirmer = "confirmer";
+        private const string revealer = "revealer";
+        private const string reassigner = "reassigner";
+        private const string signaller = "signaller";
         public OneNightWebolutionHub()
         {
             this.db = new WebolutionContext();
@@ -176,64 +178,97 @@ namespace OneNightWebolution
 
             game.NumberTraitors = numberTraitors;
         }
-        public void TakeSingleAction(int playerID, string specialist, int selectedID)
+        public void TakeSingleAction(string partyName, int playerID, string specialist, int selectedID)
         {
             Player actingPlayer = pRepo.Get(playerID);
             Player selectedPlayer = pRepo.Get(selectedID);
+            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
             if (actingPlayer.Specialist != specialist)
             {
                 return;
             }
-            
-            if (specialist == investigator)
+            switch (specialist)
             {
-                if (selectedPlayer.Role == traitor)
-                {
-                    ShowAsTraitor(selectedID, Context.ConnectionId);
-                }
-                else
-                {
-                    ShowAsRebel(selectedID, Context.ConnectionId);
-                }
-            }
-            else if (specialist == thief)
-            {
-                if (actingPlayer.Role == rebel)
-                {
-                    SwapPlayerRoles(actingPlayer, selectedPlayer);
-                }
-            }
-            else if (specialist == analyst)
-            {
-                ShowSpecialist(Context.ConnectionId, selectedPlayer.Specialist, selectedPlayer.ID);
-            }
-            else if (specialist == confirmer)
-            {
-                if (actingPlayer.Role == traitor)
-                {
-                    ShowRole(Context.ConnectionId, true);
-                }
-                else
-                {
-                    ShowRole(Context.ConnectionId, false);
-                }
-            }
-            else if (specialist == revealer)
-            {
-
-            }
-            /*switch (specialist)
-            {
-                "investigator";
-                if prepo.
-                     , 
-                    case "signaller", 
-                    case: "thief", 
-                    case: "analyst", 
-                    case: "confirmer", 
-                    case: "revealer"
+                case investigator:
+                        if (selectedPlayer.Role == traitor)
+                        {
+                            ShowAsTraitor(selectedID, Context.ConnectionId);
+                        }
+                        else
+                        {
+                            ShowAsRebel(selectedID, Context.ConnectionId);
+                        }
+                    break;
+                case thief:
+                    if (actingPlayer.Role == rebel)
+                    {
+                        SwapPlayerRoles(actingPlayer, selectedPlayer);
+                    }
+                    break;
+                case analyst:
+                    ShowSpecialist(Context.ConnectionId, selectedPlayer.Specialist, selectedPlayer.ID);
+                    break;
+                case confirmer:
+                    if (actingPlayer.Role == traitor)
+                    {
+                        ShowRole(Context.ConnectionId, true);
+                    }
+                    else
+                    {
+                        ShowRole(Context.ConnectionId, false);
+                    }
+                    break;
+                case revealer:
+                    if (actingPlayer.Role == rebel)
+                    {
+                        if (selectedPlayer.Role == rebel)
+                        {
+                            ShowRoleToAll(game.PartyName, selectedPlayer.ID, selectedPlayer.Role);
+                        }
+                    }
+                    break;
+                case signaller:
+                    Clients.Client(selectedPlayer.ConnectionID).ShowTapMessage(actingPlayer.Name);
+                    break;
                 default:
-            }*/
+                    break;
+            }
+            TakeNextTurn(game, playerID);
+        }
+
+        private void TakeReassignAction(string partyName, int playerID, string specialist, int toSwap1, int toSwap2)
+        {
+            if (specialist != reassigner)
+            {
+                return;
+            }
+            Player actingPlayer = pRepo.Get(playerID);
+            if (specialist != actingPlayer.Specialist)
+            {
+                return;
+            }
+            Player playerToSwap1 = pRepo.Get(toSwap1);
+            Player playerToSwap2 = pRepo.Get(toSwap2);
+
+            SwapPlayerRoles(playerToSwap1, playerToSwap2);
+            TakeNextTurn(db.Games.Where(s => s.PartyName == partyName).FirstOrDefault(), playerID);
+
+        }
+        private void TakeReassignAction(string partyName, int playerID, string specialist, int toSwap1)
+        {
+            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
+            if (game.NumberTraitors == 0)
+            {
+                Clients.Client(Context.ConnectionId).showFullTraitorsMessage();
+            }
+            else
+            {
+                Player toTraitor = pRepo.Get(toSwap1);
+                toTraitor.Role = traitor;
+                pRepo.SavePlayerChanges(toTraitor);
+                ShowAsTraitor(toSwap1, Context.ConnectionId);
+            }
+            TakeNextTurn(game, playerID);
         }
         /// <summary>
         /// Swaps two player's roles and updates the database
@@ -248,7 +283,19 @@ namespace OneNightWebolution
             pRepo.SavePlayerChanges(actingPlayer);
             pRepo.SavePlayerChanges(selectedPlayer);
         }
-
+        public void TakeNextTurn(Game game, int playerID)
+        {
+            Player nextPlayer = GetNextPlayer(game, pRepo.Get(playerID));
+            if (nextPlayer != null)
+            {
+                Clients.Client(nextPlayer.ConnectionID).TakeTurn();
+            }
+            else
+            {
+                //begin accusation phase
+            }
+           
+        }
         /// <summary>
         /// For specified connection, reveals player role identified by playerID as a traitor.
         /// Used for showing fellow traitors.
@@ -268,7 +315,10 @@ namespace OneNightWebolution
         {
             Clients.Client(connectionID).ShowOtherRole(playerID, rebel);
         }
-
+        public void ShowRoleToAll(string partyName, int playerID, string role)
+        {
+            Clients.Group(partyName).ShowOtherRole(playerID, role);
+        }
         /// <summary>
         /// Shows the role (traitor/rebel) on the client page
         /// </summary>
@@ -280,7 +330,7 @@ namespace OneNightWebolution
         }
 
         /// <summary>
-        /// Shows the assigned specialist on the client page
+        /// Shows the clients assigned specialist on the client page
         /// </summary>
         /// <param name="connectionID"></param>
         /// <param name="specialist"></param>
@@ -288,9 +338,28 @@ namespace OneNightWebolution
         {
             Clients.Client(connectionID).ShowSpecialist(specialist);
         }
+        /// <summary>
+        /// Shows the assigned specialist to the defined connected client for the selected other player
+        /// </summary>
+        /// <param name="connectionID"></param>
+        /// <param name="specialist"></param>
+        /// <param name="playerID"></param>
         public void ShowSpecialist(string connectionID, string specialist, int playerID)
         {
             Clients.Client(connectionID).ShowSpecialist(specialist, playerID);
+        }
+
+        public Player GetNextPlayer(Game game, Player currentPlayer)
+        {
+            var players = game.Players.SkipWhile(s => s.ID != currentPlayer.ID);
+            try {
+                return players.Skip(1).Take(1).FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
+
         }
 
     }

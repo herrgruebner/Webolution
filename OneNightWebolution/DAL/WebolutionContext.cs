@@ -8,7 +8,7 @@ using OneNightWebolution.Models;
 
 namespace OneNightWebolution.DAL
 {
-    class WebolutionContext : DbContext
+    public class WebolutionContext : DbContext
     {
         public WebolutionContext() : base("WebolutionContext")
         {

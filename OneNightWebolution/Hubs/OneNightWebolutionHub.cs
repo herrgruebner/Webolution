@@ -6,6 +6,7 @@ using OneNightWebolution.DAL;
 using System.Linq;
 using OneNightWebolution.Repositories;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace OneNightWebolution
 {
@@ -16,6 +17,7 @@ namespace OneNightWebolution
         public OneNightWebolutionHub()
         {
             this.db = new WebolutionContext();
+            this.pRepo = new PlayerRepository(db);
         }
         
         public void Send(string name, string message)
@@ -33,15 +35,20 @@ namespace OneNightWebolution
         {
             Player player = new Player(playerName, Context.ConnectionId);
             await Groups.Add(Context.ConnectionId, partyName);
-            pRepo.Add(player);
 
             Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
             if (game == null)
             {
+                Debug.WriteLine("Game is null");
                 game = new Game() { PartyName = partyName };
                 db.Games.Add(game);
                 Clients.Caller.ShowStartButton();
             }
+            player.Game = game;
+            player.GameID = game.ID;
+            
+            pRepo.Add(player);
+
             ShowPartyAndPlayerNameAndID(partyName, playerName, game.ID, player.ID);
             game.AddPlayer(player);
             Clients.Group(partyName).ShowOtherPlayer(playerName, player.ID);
@@ -66,7 +73,7 @@ namespace OneNightWebolution
         /// Called from party leader client side, locks adding players and begins the game.
         /// </summary>
         /// <param name="gameID"></param>
-        public async void BeginGame(int gameID)
+        public void BeginGame(int gameID)
         {
             // Todo: add a game started lock.
             Game game = db.Games.First(s => s.ID == gameID);

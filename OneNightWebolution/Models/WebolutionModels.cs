@@ -40,6 +40,10 @@ namespace OneNightWebolution.Models
             Name = playerName;
             ConnectionID = connectionID;
         }
+        public Player()
+        {
+
+        }
         
     }
 }

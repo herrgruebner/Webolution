@@ -11,8 +11,12 @@ namespace OneNightWebolution.Repositories
 {
     public class PlayerRepository
     {
+        
         private WebolutionContext context { get; set; }
-
+        public PlayerRepository(WebolutionContext db)
+        {
+            context = db;
+        }
         public IEnumerable<Player> Get()
         {
             return context.Players.ToList();

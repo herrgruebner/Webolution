@@ -27,7 +27,7 @@ hub.client.showOtherPlayer = function (otherPlayerName, otherPlayerID) {
 };
 
 hub.client.showStartButton = function () {
-    $('startButton').removeClass('hidden');
+    $('#startButton').removeClass('hidden')
 };
 
 hub.client.setPlayerID = function (playerID) {

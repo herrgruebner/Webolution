@@ -2,22 +2,34 @@
 
 $.connection.hub.start().done(function () {
     $('#join').click(function () {
+        $('#playerNameInput').addClass('hidden');
+        $('#partynameinput').addClass('hidden');
+        $('#join').addClass('hidden');
         hub.server.addPlayerToParty($('#playerNameInput').val(), $('#partynameinput').val());
-
+        
     });
 
     $('#startButton').click(function () {
-        hub.server.BeginGame($('#gameid').val());
+        hub.server.beginGame($('#gameid').val());
+        $('#startButton').addClass('hidden');
     });
 
 });
 
+function hideJoinInputs() {
+    $('#playerNameInput').addClass('hidden');
+    $('#partynameinput').addClass('hidden');
+    $('#join').addClass('hidden');
+};
+
 hub.client.showPartyName = function (partyName) {
     $('#partyName').text(partyName);
+    $('#partyName').removeClass('hidden');
 };
 
 hub.client.showPlayerName = function (playerName) {
     $('#playerName').text(playerName);
+    $('#playerName').removeClass('hidden');
 };
 
 hub.client.showOtherPlayer = function (otherPlayerName, otherPlayerID) {

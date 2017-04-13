@@ -55,17 +55,33 @@ namespace OneNightWebolution
                 db.Games.Add(game);
                 Clients.Caller.ShowStartButton();
             }
+            else
+            {
+                ShowCurrentlyConnectedPlayersOnJoin(partyName); // only run this when 
+            }
             player.Game = game;
             player.GameID = game.ID;
             
             pRepo.Add(player);
 
             ShowPartyAndPlayerNameAndID(partyName, playerName, game.ID, player.ID);
+            
             game.AddPlayer(player);
             Clients.Group(partyName).ShowOtherPlayer(playerName, player.ID);
             db.SaveChanges();
         }
-
+        /// <summary>
+        /// When a player joins, show them all the players who joined before
+        /// </summary>
+        public void ShowCurrentlyConnectedPlayersOnJoin(string partyName)
+        {
+            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
+            foreach (Player player in game.Players)
+            {
+                Debug.WriteLine(player.Name);
+                Clients.Caller.ShowOtherPlayer(player.Name, player.ID);
+            }
+        }
         /// <summary>
         /// Shows the party name and player name and sets the IDs on the client page
         /// </summary>

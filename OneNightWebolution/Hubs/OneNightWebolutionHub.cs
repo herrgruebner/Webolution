@@ -195,6 +195,10 @@ namespace OneNightWebolution
         }
         public void TakeSingleAction(string partyName, int playerID, string specialist, int selectedID)
         {
+            Debug.WriteLine("single action");
+            Debug.WriteLine("specialist " + specialist);
+            Debug.WriteLine("playerid " + playerID );
+            Debug.WriteLine("selectedid " + selectedID);
             Player actingPlayer = pRepo.Get(playerID);
             Player selectedPlayer = pRepo.Get(selectedID);
             Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
@@ -205,19 +209,20 @@ namespace OneNightWebolution
             switch (specialist)
             {
                 case investigator:
-                        if (selectedPlayer.Role == traitor)
-                        {
-                            ShowAsTraitor(selectedID, Context.ConnectionId);
-                        }
-                        else
-                        {
-                            ShowAsRebel(selectedID, Context.ConnectionId);
-                        }
+                    if (selectedPlayer.Role == traitor)
+                    {
+                        ShowAsTraitor(selectedID, Context.ConnectionId);
+                    }
+                    else
+                    {
+                        ShowAsRebel(selectedID, Context.ConnectionId);
+                    }
                     break;
                 case thief:
                     if (actingPlayer.Role == rebel)
                     {
-                        SwapPlayerRoles(actingPlayer, selectedPlayer);
+                        SwapPlayerRolesInDB(actingPlayer, selectedPlayer);
+                        Clients.Caller.ShowRole(actingPlayer.Role);
                     }
                     break;
                 case analyst:
@@ -265,7 +270,7 @@ namespace OneNightWebolution
             Player playerToSwap1 = pRepo.Get(toSwap1);
             Player playerToSwap2 = pRepo.Get(toSwap2);
 
-            SwapPlayerRoles(playerToSwap1, playerToSwap2);
+            SwapPlayerRolesInDB(playerToSwap1, playerToSwap2);
             TakeNextTurn(db.Games.Where(s => s.PartyName == partyName).FirstOrDefault(), playerID);
 
         }
@@ -290,7 +295,7 @@ namespace OneNightWebolution
         /// </summary>
         /// <param name="actingPlayer"></param>
         /// <param name="selectedPlayer"></param>
-        private void SwapPlayerRoles(Player actingPlayer, Player selectedPlayer)
+        private void SwapPlayerRolesInDB(Player actingPlayer, Player selectedPlayer)
         {
             string roleToSwap = actingPlayer.Role;
             actingPlayer.Role = selectedPlayer.Role;
@@ -362,7 +367,7 @@ namespace OneNightWebolution
         /// <param name="playerID"></param>
         public void ShowSpecialist(string connectionID, string specialist, int playerID)
         {
-            Clients.Client(connectionID).ShowOtherSpecialist(specialist, playerID);
+            Clients.Client(connectionID).ShowOtherSpecialist(specialist, playerID); // showOtherSpecialist not showSpecialist because js doesn't do method overloads
         }
 
         public Player GetNextPlayer(Game game, Player currentPlayer)

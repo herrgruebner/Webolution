@@ -52,15 +52,13 @@ hub.client.setPartyID = function (gameID) {
 
 hub.client.showRole = function (isTraitor) {
     if (isTraitor) {
-        $('#rolebox').text("Traitor");
+        $('#rolebox').text("traitor");
     }
     else {
-        $('#rolebox').text("Rebel");
+        $('#rolebox').text("rebel");
     }
 };
 hub.client.showSpecialist = function (specialist) {
-    console.log("specialist is");
-    console.log(specialist);
     $('#specialist').text(specialist);
 };
 
@@ -73,27 +71,32 @@ hub.client.showGameBegun = function () {
 };
 
 hub.client.showOtherRole = function (playerID, role) {
-    $('#playerID').find('.role').text(role);
+    $('#' + playerID).find('.role').text(role);
 }
 
 hub.client.takeTurn = function () {
     $('#gamestate').text("Your Turn");
     var singleClickSpecialists = ["investigator", "thief", "analyst", "confirmer", "revealer"];
     var multiClickSpecialists = ["reassinger", "signaller"];
-    
-    if (getPlayerSpecialist() in singleClickSpecialists) {
+    console.log("take turn reached");
+
+    if (singleClickSpecialists.includes(getPlayerSpecialist() )) {
+        console.log("single click specialist");
         $('.otherplayercontainer').on('click', function () {
             var selectedID = $(this).attr('id');
-
-            hub.server.takeSingleAction(getPlayerID(), getPlayerSpecialist(), selectedID);
+            console.log("single click specialist click detected");
+            hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
+            $('.otherplayercontainer').off('click')
         });
     }
     else if (getPlayerSpecialist() == "signaller") {
-        if (getplayerRole() == "rebel") {
+        console.log("signaller");
+        if (getPlayerRole() == "rebel") {
             $('.otherplayercontainer').on('click', function () {
                 var selectedID = $(this).attr('id');
 
                 hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
+                $('.otherplayercontainer').off('click')
             });
         }
         else {
@@ -104,6 +107,7 @@ hub.client.takeTurn = function () {
                         var selectedID = $(this).attr('id');
 
                         hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
+                        $('.otherplayercontainer').off('click')
                     });
                 }
             }
@@ -119,6 +123,7 @@ hub.client.takeTurn = function () {
             if (getPlayerRole == "rebel") {
                 if (swapIDArray.length == 2) {
                     hub.server.takeReassignAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0], swapIDArray[1]);
+                    $('.otherplayercontainer').off('click')
                 }
             }
             else {

@@ -10,7 +10,7 @@ $.connection.hub.start().done(function () {
     });
 
     $('#startButton').click(function () {
-        hub.server.beginGame($('#gameid').val());
+        hub.server.beginGame($('#gameid').text());
         $('#startButton').addClass('hidden');
     });
 
@@ -50,7 +50,7 @@ hub.client.setPartyID = function (gameID) {
     $('#gameid').text(gameID);
 };
 
-hub.client.showID = function (isTraitor) {
+hub.client.showRole = function (isTraitor) {
     if (isTraitor) {
         $('#rolebox').text("Traitor");
     }
@@ -59,10 +59,12 @@ hub.client.showID = function (isTraitor) {
     }
 };
 hub.client.showSpecialist = function (specialist) {
+    console.log("specialist is");
+    console.log(specialist);
     $('#specialist').text(specialist);
 };
 
-hub.client.showSpecialist = function (specialist, playerID) {
+hub.client.showOtherSpecialist = function (specialist, playerID) {
     $('#playerID').find('.specialist').text(specialist);
 };
 
@@ -148,4 +150,8 @@ getPlayerRole = function () {
 
 getPartyName = function () {
     return $('#partyName').text();
+};
+
+getGameID = function () {
+    return $('#gameid').text();
 };

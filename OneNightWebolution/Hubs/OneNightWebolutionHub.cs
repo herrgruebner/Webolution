@@ -102,6 +102,8 @@ namespace OneNightWebolution
         /// <param name="gameID"></param>
         public void BeginGame(int gameID)
         {
+            Debug.WriteLine(gameID);
+            Debug.WriteLine("HELLO");
             // Todo: add a game started lock.
             Game game = db.Games.First(s => s.ID == gameID);
             AssignRolesAndSpecialists(game);
@@ -154,9 +156,6 @@ namespace OneNightWebolution
                 {"analyst",2 }, {"confirmer", 2},
                 {"revealer", 2 }
             };
-            //int totalSpecialisationCards = 14;
-            //int[] specialisationAmounts = new int[7] { 2, 2, 2, 2, 2, 2, 2 };
-
             foreach (Player player in game.Players)
             {
                 // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
@@ -174,29 +173,22 @@ namespace OneNightWebolution
                     ShowRole(player.ConnectionID, false);
                     pRepo.SavePlayerChanges(player);
                 }
+                bool notAssigned = true;
 
-                /*int rand  = r.Next(1, totalSpecialisationCards);
-                foreach (int current in specialisationAmounts)
+                while (notAssigned) // loop until we find an available specialisation.
                 {
-                    rand -= specialisationAmounts[current];
-                    if(rand <= 0)
+                    string randSpecialisation = specialisations[r.Next(0, specialisations.Length)];
+                    if (specialisationDict[randSpecialisation] > 0)
                     {
-                        player.Specialist = specialisations[current];
-                        specialisationAmounts[current]--;
+                        player.Specialist = randSpecialisation;
+                        specialisationDict[randSpecialisation] -= 1;
                         ShowSpecialist(player.ConnectionID, player.Specialist);
+                        Debug.WriteLine(player.Specialist);
                         pRepo.SavePlayerChanges(player);
+                        notAssigned = false;
                     }
-                }*/
-                string randSpecialisation = specialisations[r.Next(0, specialisations.Length)];
-                if (specialisationDict[randSpecialisation] > 0)
-                {
-                    player.Specialist = randSpecialisation;
-                    specialisationDict[randSpecialisation] -= 1;
-                    ShowSpecialist(player.ConnectionID, player.Specialist);
-                    pRepo.SavePlayerChanges(player);
-                }
 
-                //totalSpecialisationCards--;
+                }
             }
 
             game.NumberTraitors = numberTraitors;
@@ -359,6 +351,7 @@ namespace OneNightWebolution
         /// <param name="specialist"></param>
         public void ShowSpecialist(string connectionID, string specialist)
         {
+            Debug.WriteLine(specialist);
             Clients.Client(connectionID).ShowSpecialist(specialist);
         }
         /// <summary>
@@ -369,7 +362,7 @@ namespace OneNightWebolution
         /// <param name="playerID"></param>
         public void ShowSpecialist(string connectionID, string specialist, int playerID)
         {
-            Clients.Client(connectionID).ShowSpecialist(specialist, playerID);
+            Clients.Client(connectionID).ShowOtherSpecialist(specialist, playerID);
         }
 
         public Player GetNextPlayer(Game game, Player currentPlayer)

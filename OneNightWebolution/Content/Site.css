@@ -26,3 +26,8 @@ textarea {
 .selectedplayer {
     background-color: lightgray;
 }
+
+.otherplayercontainer {
+    margin: 20px 0 20px 0;
+    background-color: lightblue;
+}

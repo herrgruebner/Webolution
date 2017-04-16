@@ -50,7 +50,6 @@ namespace OneNightWebolution
             Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
             if (game == null)
             {
-                Debug.WriteLine("Game is null");
                 game = new Game() { PartyName = partyName };
                 db.Games.Add(game);
                 Clients.Caller.ShowStartButton();
@@ -73,12 +72,11 @@ namespace OneNightWebolution
         /// <summary>
         /// When a player joins, show them all the players who joined before
         /// </summary>
-        public void ShowCurrentlyConnectedPlayersOnJoin(string partyName)
+        private void ShowCurrentlyConnectedPlayersOnJoin(string partyName)
         {
             Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
             foreach (Player player in game.Players)
             {
-                Debug.WriteLine(player.Name);
                 Clients.Caller.ShowOtherPlayer(player.Name, player.ID);
             }
         }
@@ -89,7 +87,7 @@ namespace OneNightWebolution
         /// <param name="playerName"></param>
         /// <param name="partyID"></param>
         /// <param name="gameID"></param>
-        public void ShowPartyAndPlayerNameAndID(string partyName, string playerName, int partyID, int gameID)
+        private void ShowPartyAndPlayerNameAndID(string partyName, string playerName, int partyID, int gameID)
         {
             Clients.Caller.ShowPlayerName(playerName);
             Clients.Caller.ShowPartyName(partyName);
@@ -102,8 +100,7 @@ namespace OneNightWebolution
         /// <param name="gameID"></param>
         public void BeginGame(int gameID)
         {
-            Debug.WriteLine(gameID);
-            Debug.WriteLine("HELLO");
+            Debug.WriteLine("Game begun");
             // Todo: add a game started lock.
             Game game = db.Games.First(s => s.ID == gameID);
             AssignRolesAndSpecialists(game);
@@ -117,7 +114,7 @@ namespace OneNightWebolution
         /// At the start of a round, reveals all traitors to the other traitors.
         /// </summary>
         /// <param name="game"></param>
-        public void ShowTraitorsToTraitors(Game game)
+        private void ShowTraitorsToTraitors(Game game)
         {
             Dictionary<int, string> idConnectionDict = new Dictionary<int, string>();
             List<string> connections = new List<string>();
@@ -183,7 +180,6 @@ namespace OneNightWebolution
                         player.Specialist = randSpecialisation;
                         specialisationDict[randSpecialisation] -= 1;
                         ShowSpecialist(player.ConnectionID, player.Specialist);
-                        Debug.WriteLine(player.Specialist);
                         pRepo.SavePlayerChanges(player);
                         notAssigned = false;
                     }
@@ -192,6 +188,41 @@ namespace OneNightWebolution
             }
 
             game.NumberTraitors = numberTraitors;
+        }
+
+        public void TakeReassignRebelAction(string partyName, int playerID, string specialist, int toSwap1, int toSwap2)
+        {
+            if (specialist != reassigner)
+            {
+                return;
+            }
+            Player actingPlayer = pRepo.Get(playerID);
+            if (specialist != actingPlayer.Specialist)
+            {
+                return;
+            }
+            Player playerToSwap1 = pRepo.Get(toSwap1);
+            Player playerToSwap2 = pRepo.Get(toSwap2);
+
+            SwapPlayerRolesInDB(playerToSwap1, playerToSwap2);
+            TakeNextTurn(db.Games.Where(s => s.PartyName == partyName).FirstOrDefault(), playerID);
+
+        }
+        public void TakeReassignTraitorAction(string partyName, int playerID, string specialist, int toSwap1)
+        {
+            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
+            if (game.NumberTraitors == 0)
+            {
+                Clients.Client(Context.ConnectionId).showFullTraitorsMessage();
+            }
+            else
+            {
+                Player toTraitor = pRepo.Get(toSwap1);
+                toTraitor.Role = traitor;
+                pRepo.SavePlayerChanges(toTraitor);
+                ShowAsTraitor(toSwap1, Context.ConnectionId);
+            }
+            TakeNextTurn(game, playerID);
         }
         public void TakeSingleAction(string partyName, int playerID, string specialist, int selectedID)
         {
@@ -256,40 +287,7 @@ namespace OneNightWebolution
             TakeNextTurn(game, playerID);
         }
 
-        private void TakeReassignAction(string partyName, int playerID, string specialist, int toSwap1, int toSwap2)
-        {
-            if (specialist != reassigner)
-            {
-                return;
-            }
-            Player actingPlayer = pRepo.Get(playerID);
-            if (specialist != actingPlayer.Specialist)
-            {
-                return;
-            }
-            Player playerToSwap1 = pRepo.Get(toSwap1);
-            Player playerToSwap2 = pRepo.Get(toSwap2);
-
-            SwapPlayerRolesInDB(playerToSwap1, playerToSwap2);
-            TakeNextTurn(db.Games.Where(s => s.PartyName == partyName).FirstOrDefault(), playerID);
-
-        }
-        private void TakeReassignAction(string partyName, int playerID, string specialist, int toSwap1)
-        {
-            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
-            if (game.NumberTraitors == 0)
-            {
-                Clients.Client(Context.ConnectionId).showFullTraitorsMessage();
-            }
-            else
-            {
-                Player toTraitor = pRepo.Get(toSwap1);
-                toTraitor.Role = traitor;
-                pRepo.SavePlayerChanges(toTraitor);
-                ShowAsTraitor(toSwap1, Context.ConnectionId);
-            }
-            TakeNextTurn(game, playerID);
-        }
+        
         /// <summary>
         /// Swaps two player's roles and updates the database
         /// </summary>
@@ -303,16 +301,17 @@ namespace OneNightWebolution
             pRepo.SavePlayerChanges(actingPlayer);
             pRepo.SavePlayerChanges(selectedPlayer);
         }
-        public void TakeNextTurn(Game game, int playerID)
+        private void TakeNextTurn(Game game, int playerID)
         {
             Player nextPlayer = GetNextPlayer(game, pRepo.Get(playerID));
             if (nextPlayer != null)
             {
+                Debug.WriteLine(nextPlayer.Name);
                 Clients.Client(nextPlayer.ConnectionID).TakeTurn();
             }
             else
             {
-                //begin accusation phase
+                Debug.WriteLine("Accusation phase reached");
             }
            
         }
@@ -322,7 +321,7 @@ namespace OneNightWebolution
         /// </summary>
         /// <param name="playerID"></param>
         /// <param name="connectionID"></param>
-        public void ShowAsTraitor(int playerID, string connectionID)
+        private void ShowAsTraitor(int playerID, string connectionID)
         {
             Clients.Client(connectionID).ShowOtherRole(playerID, traitor);
         }
@@ -331,11 +330,11 @@ namespace OneNightWebolution
         /// </summary>
         /// <param name="playerID"></param>
         /// <param name="connectionID"></param>
-        public void ShowAsRebel(int playerID, string connectionID)
+        private void ShowAsRebel(int playerID, string connectionID)
         {
             Clients.Client(connectionID).ShowOtherRole(playerID, rebel);
         }
-        public void ShowRoleToAll(string partyName, int playerID, string role)
+        private void ShowRoleToAll(string partyName, int playerID, string role)
         {
             Clients.Group(partyName).ShowOtherRole(playerID, role);
         }
@@ -344,7 +343,7 @@ namespace OneNightWebolution
         /// </summary>
         /// <param name="connectionID"></param>
         /// <param name="IsTraitor"></param>
-        public void ShowRole(string connectionID, bool IsTraitor)
+        private void ShowRole(string connectionID, bool IsTraitor)
         {
             Clients.Client(connectionID).ShowRole(IsTraitor);
         }
@@ -354,7 +353,7 @@ namespace OneNightWebolution
         /// </summary>
         /// <param name="connectionID"></param>
         /// <param name="specialist"></param>
-        public void ShowSpecialist(string connectionID, string specialist)
+        private void ShowSpecialist(string connectionID, string specialist)
         {
             Debug.WriteLine(specialist);
             Clients.Client(connectionID).ShowSpecialist(specialist);
@@ -365,13 +364,18 @@ namespace OneNightWebolution
         /// <param name="connectionID"></param>
         /// <param name="specialist"></param>
         /// <param name="playerID"></param>
-        public void ShowSpecialist(string connectionID, string specialist, int playerID)
+        private void ShowSpecialist(string connectionID, string specialist, int playerID)
         {
             Clients.Client(connectionID).ShowOtherSpecialist(specialist, playerID); // showOtherSpecialist not showSpecialist because js doesn't do method overloads
         }
 
-        public Player GetNextPlayer(Game game, Player currentPlayer)
+        private Player GetNextPlayer(Game game, Player currentPlayer)
         {
+            Debug.WriteLine("");
+            foreach (Player player in game.Players)
+            {
+                Debug.WriteLine(player.Name);
+            }
             var players = game.Players.SkipWhile(s => s.ID != currentPlayer.ID);
             try {
                 return players.Skip(1).Take(1).FirstOrDefault();

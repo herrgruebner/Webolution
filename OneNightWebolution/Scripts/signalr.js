@@ -33,9 +33,11 @@ hub.client.showPlayerName = function (playerName) {
 };
 
 hub.client.showOtherPlayer = function (otherPlayerName, otherPlayerID) {
-    $('#otherplayers').append('<div id=' + otherPlayerID +
-        ' class="otherplayercontainer"><div class="role">Role: Unknown</div><div class="specialist">Specialist: Unknown</div><div>'
-        + otherPlayerName + '</div>');
+    $('#otherplayers').append('<div id=' + otherPlayerID + ' class="otherplayercontainer">' +
+        '<div>' + otherPlayerName + '</div>' +
+        '<div class="role">Role: Unknown</div>' +
+        '<div class="specialist">Specialist: Unknown</div>' +
+    '</div>');
 };
 
 hub.client.showStartButton = function () {
@@ -63,7 +65,7 @@ hub.client.showSpecialist = function (specialist) {
 };
 
 hub.client.showOtherSpecialist = function (specialist, playerID) {
-    $('#playerID').find('.specialist').text(specialist);
+    $('#' + playerID).find('.specialist').text(specialist);
 };
 
 hub.client.showGameBegun = function () {
@@ -75,7 +77,7 @@ hub.client.showOtherRole = function (playerID, role) {
 }
 
 hub.client.takeTurn = function () {
-    $('#gamestate').text("Your Turn");
+    setGameState("Your Turn");
     var singleClickSpecialists = ["investigator", "thief", "analyst", "confirmer", "revealer"];
     var multiClickSpecialists = ["reassinger", "signaller"];
     console.log("take turn reached");
@@ -86,7 +88,8 @@ hub.client.takeTurn = function () {
             var selectedID = $(this).attr('id');
             console.log("single click specialist click detected");
             hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
-            $('.otherplayercontainer').off('click')
+            $('.otherplayercontainer').off('click');
+            setGameState("waiting for other players");
         });
     }
     else if (getPlayerSpecialist() == "signaller") {
@@ -94,9 +97,9 @@ hub.client.takeTurn = function () {
         if (getPlayerRole() == "rebel") {
             $('.otherplayercontainer').on('click', function () {
                 var selectedID = $(this).attr('id');
-
+                setGameState("waiting for other players");
                 hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
-                $('.otherplayercontainer').off('click')
+                $('.otherplayercontainer').off('click');
             });
         }
         else {
@@ -105,15 +108,16 @@ hub.client.takeTurn = function () {
                 if ($(role).text() == "rebel") {
                     $(role).parent().on('click', function () {
                         var selectedID = $(this).attr('id');
-
+                        setGameState("waiting for other players");
                         hub.server.takeSingleAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), selectedID);
-                        $('.otherplayercontainer').off('click')
+                        $('.otherplayercontainer').off('click');
                     });
                 }
             }
         }
     }
-    else if (getPlayerSpecialist == "reassigner") {
+    else if (getPlayerSpecialist() == "reassigner") {
+        console.log("reassigner");
         $('#takeactionbutton').removeClass('hidden');
         var swapIDArray = [];
 
@@ -122,12 +126,12 @@ hub.client.takeTurn = function () {
             this.setAttribute("class", "otherplayercontainer selectedplayer")
             if (getPlayerRole == "rebel") {
                 if (swapIDArray.length == 2) {
-                    hub.server.takeReassignAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0], swapIDArray[1]);
-                    $('.otherplayercontainer').off('click')
+                    hub.server.takeReassignRebelAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0], swapIDArray[1]);
+                    $('.otherplayercontainer').off('click');
                 }
             }
             else {
-                hub.server.takeReassignAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0], swapIDArray[1])
+                hub.server.takeReassignTraitorAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0]);
             }
         });
     }
@@ -159,4 +163,8 @@ getPartyName = function () {
 
 getGameID = function () {
     return $('#gameid').text();
+};
+
+setGameState = function (message) {
+    $('#gamestate').text(message);
 };

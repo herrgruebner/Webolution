@@ -48,7 +48,7 @@ namespace OneNightWebolution
             
             await Groups.Add(Context.ConnectionId, partyName);
 
-            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
+            Game game = db.Games.FirstOrDefault(s => s.PartyName == partyName);
             if (game == null)
             {
                 game = new Game() { PartyName = partyName };
@@ -76,7 +76,7 @@ namespace OneNightWebolution
         /// </summary>
         private void ShowCurrentlyConnectedPlayersOnJoin(string partyName)
         {
-            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
+            Game game = db.Games.FirstOrDefault(s => s.PartyName == partyName);
             foreach (Player player in game.Players)
             {
                 Clients.Caller.ShowOtherPlayer(player.Name, player.ID);
@@ -157,7 +157,6 @@ namespace OneNightWebolution
             };
             foreach (Player player in game.Players)
             {
-                // Call functions on specific clients using Clients.Client(player.ConnectionID).functionname();
                 if (r.Next(1, numberTraitors + numberRebels) <= numberTraitors)
                 { // Player is traitor
                     player.Role = traitor;
@@ -207,12 +206,12 @@ namespace OneNightWebolution
             Player playerToSwap2 = pRepo.Get(toSwap2);
 
             SwapPlayerRolesInDB(playerToSwap1, playerToSwap2);
-            TakeNextTurn(db.Games.Where(s => s.PartyName == partyName).FirstOrDefault(), playerID);
+            TakeNextTurn(db.Games.FirstOrDefault(s => s.PartyName == partyName), playerID);
 
         }
         public void TakeReassignTraitorAction(string partyName, int playerID, string specialist, int toSwap1)
         {
-            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
+            Game game = db.Games.FirstOrDefault(s => s.PartyName == partyName);
             if (game.NumberTraitors == 0)
             {
                 Clients.Client(Context.ConnectionId).showFullTraitorsMessage();
@@ -234,7 +233,7 @@ namespace OneNightWebolution
             Debug.WriteLine("selectedid " + selectedID);
             Player actingPlayer = pRepo.Get(playerID);
             Player selectedPlayer = pRepo.Get(selectedID);
-            Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
+            Game game = db.Games.FirstOrDefault(s => s.PartyName == partyName);
             if (actingPlayer.Specialist != specialist)
             {
                 return;

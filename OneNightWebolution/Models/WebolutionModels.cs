@@ -16,6 +16,7 @@ namespace OneNightWebolution.Models
             NumberPlayers = 0;
         }
         public int ID { get; set; }
+        public int LeaderID { get; set; }
         public string PartyName { get; set; }
         public int NumberPlayers { get; set; }
         public int NumberTraitors { get; set; }
@@ -35,6 +36,7 @@ namespace OneNightWebolution.Models
         public string Role { get; set; }
         public string Specialist { get; set; }
         public int GameID { get; set; }
+        public int votingForID { get; set; }
         public virtual Game Game { get; set; }
         public Player(string playerName, string connectionID)
         {

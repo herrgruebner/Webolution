@@ -102,6 +102,7 @@ hub.client.takeTurn = function () {
     }
     else if (getPlayerSpecialist() == "signaller") {
         console.log("signaller");
+        console.log(getPlayerRole());
         if (getPlayerRole() == "rebel") {
             $('.otherplayercontainer').on('click', function () {
                 var selectedID = $(this).attr('id');
@@ -113,7 +114,7 @@ hub.client.takeTurn = function () {
         else {
             rolecontainers = $('.role')
             for (role in rolecontainers) {
-                if ($(role).text() == "rebel") {
+                if ($(role).text() == "traitor") {
                     $(role).parent().on('click', function () {
                         var selectedID = $(this).attr('id');
                         setGameState("waiting for other players");
@@ -132,14 +133,17 @@ hub.client.takeTurn = function () {
         $('.otherplayercontainer').on('click', function () {
             swapIDArray.push($(this).attr('id'));
             this.setAttribute("class", "otherplayercontainer selectedplayer")
-            if (getPlayerRole == "rebel") {
+            console.log
+            if (getPlayerRole() == "rebel") {
                 if (swapIDArray.length == 2) {
                     hub.server.takeReassignRebelAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0], swapIDArray[1]);
                     $('.otherplayercontainer').off('click');
+                    setGameState("waiting for other players");
                 }
             }
             else {
                 hub.server.takeReassignTraitorAction(getPartyName(), getPlayerID(), getPlayerSpecialist(), swapIDArray[0]);
+                setGameState("waiting for other players");
             }
         });
     }
@@ -162,11 +166,12 @@ hub.client.addClickToVoteHandlers = function () {
     });
 }
 
-hub.client.setGameStateFromServer = function () {
+hub.client.setGameStateFromServer = function (message) {
     $('#gamestate').text(message);
 }
 
 hub.client.addEndGameButton = function () {
+    $('#endButton').removeClass('hidden');
     $('#endButton').click(function () {
         hub.server.EndGame(getGameID());
     });

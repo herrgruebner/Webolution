@@ -47,15 +47,15 @@ namespace OneNightWebolution
             Player player = new Player(playerName, Context.ConnectionId);
             
             await Groups.Add(Context.ConnectionId, partyName);
-
+            bool isLeader = false;
             Game game = db.Games.FirstOrDefault(s => s.PartyName == partyName);
             if (game == null)
             {
                 game = new Game() { PartyName = partyName };
                 db.Games.Add(game);
                 Clients.Caller.ShowStartButton();
-
-                game.LeaderID = player.ID;
+                isLeader = true;
+                
             }
             else
             {
@@ -68,7 +68,10 @@ namespace OneNightWebolution
             pRepo.Add(player);
 
             ShowPartyAndPlayerNameAndID(partyName, playerName, game.ID, player.ID);
-            
+            if (isLeader)
+            {
+                game.LeaderID = player.ID;
+            }
             game.AddPlayer(player);
             Clients.Group(partyName).ShowOtherPlayer(playerName, player.ID);
             db.SaveChanges();
@@ -104,7 +107,6 @@ namespace OneNightWebolution
         /// <param name="gameID"></param>
         public void BeginGame(int gameID)
         {
-            Debug.WriteLine("Game begun");
             // Todo: add a game started lock.
             Game game = db.Games.First(s => s.ID == gameID);
             AssignRolesAndSpecialists(game);
@@ -316,19 +318,20 @@ namespace OneNightWebolution
             {
                 Debug.WriteLine("Accusation phase reached");
                 Player leader = pRepo.Get(game.LeaderID);
-                Clients.Group(game.PartyName).addClickToVoteHandlers();
-                Clients.Client(leader.ConnectionID).addEndGameButton();
+                Clients.Group(game.PartyName).AddClickToVoteHandlers();
+                Clients.Client(leader.ConnectionID).AddEndGameButton();
+                Clients.Group(game.PartyName).SetGameStateFromServer("Accusation phase");
             }
         }
 
-        private void AddVote(int playerID, int selectedID)
+        public void AddVote(int playerID, int selectedID)
         {
             Player actingPlayer = pRepo.Get(playerID);
             actingPlayer.votingForID = selectedID;
             pRepo.SavePlayerChanges(actingPlayer);
         }
 
-        private void EndGame(int gameID)
+        public void EndGame(int gameID)
         {
             Game game = db.Games.FirstOrDefault(s => s.ID == gameID);
             Dictionary<int, int> voteDict = new Dictionary<int, int>();
@@ -413,7 +416,6 @@ namespace OneNightWebolution
         /// <param name="specialist"></param>
         private void ShowSpecialist(string connectionID, string specialist)
         {
-            Debug.WriteLine(specialist);
             Clients.Client(connectionID).ShowSpecialist(specialist);
         }
         /// <summary>
@@ -430,11 +432,6 @@ namespace OneNightWebolution
         private Player GetNextPlayer(Game game, Player currentPlayer)
         {
             int positionNumber = currentPlayer.PositionInGame;
-            Debug.WriteLine("playerlist start");
-            foreach (Player player in game.Players)
-            {
-                Debug.WriteLine(player.Name);
-            }
             if (currentPlayer.PositionInGame == game.NumberPlayers-1)
             {
                 return null;

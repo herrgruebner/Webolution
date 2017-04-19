@@ -45,6 +45,7 @@ namespace OneNightWebolution
         public async void AddPlayerToParty(string playerName, string partyName)
         {
             Player player = new Player(playerName, Context.ConnectionId);
+            
             await Groups.Add(Context.ConnectionId, partyName);
 
             Game game = db.Games.Where(s => s.PartyName == partyName).FirstOrDefault();
@@ -62,6 +63,7 @@ namespace OneNightWebolution
             }
             player.Game = game;
             player.GameID = game.ID;
+            player.PositionInGame = game.NumberPlayers;
             
             pRepo.Add(player);
 
@@ -428,22 +430,19 @@ namespace OneNightWebolution
 
         private Player GetNextPlayer(Game game, Player currentPlayer)
         {
-            Debug.WriteLine("");
+            int positionNumber = currentPlayer.PositionInGame;
+            Debug.WriteLine("playerlist start");
             foreach (Player player in game.Players)
             {
                 Debug.WriteLine(player.Name);
             }
-            var players = game.Players.SkipWhile(s => s.ID != currentPlayer.ID);
-            try {
-                return players.Skip(1).Take(1).FirstOrDefault();
-            }
-            catch
+            if (currentPlayer.PositionInGame == game.NumberPlayers-1)
             {
                 return null;
             }
-
+            var nextPlayer = game.Players.SkipWhile(s => s.PositionInGame != positionNumber + 1).FirstOrDefault();
+            return nextPlayer;
+           
         }
-
     }
-
 }

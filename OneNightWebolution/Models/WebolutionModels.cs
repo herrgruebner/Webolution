@@ -30,6 +30,7 @@ namespace OneNightWebolution.Models
     public class Player
     {
         public int ID { get; set; }
+        public int PositionInGame { get; set; }
         public string ConnectionID { get; set; }
         public string Name { get; set; }
         public string Role { get; set; }

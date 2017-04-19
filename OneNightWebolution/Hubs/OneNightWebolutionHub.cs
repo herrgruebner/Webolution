@@ -312,9 +312,18 @@ namespace OneNightWebolution
             else
             {
                 Debug.WriteLine("Accusation phase reached");
+                Clients.Group(game.PartyName).addClickToVoteHandlers();
             }
            
         }
+
+        private void AddVote(int playerID, int selectedID)
+        {
+            Player actingPlayer = pRepo.Get(playerID);
+            actingPlayer.votingForID = selectedID;
+            pRepo.SavePlayerChanges(actingPlayer);
+        }
+
         /// <summary>
         /// For specified connection, reveals player role identified by playerID as a traitor.
         /// Used for showing fellow traitors.

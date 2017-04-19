@@ -145,6 +145,15 @@ hub.client.showFullTraitorsMessage = function () {
     $('#message').text('Already full of traitors');
 }
 
+hub.client.addClickToVoteHandlers = function () {
+    $('.otherplayercontainer').on('click', function () {
+        var selectedID = $(this).attr('id');
+        hub.server.AddVote(getPlayerID(), selectedID);
+        $('.otherplayercontainer').off('click');
+        setGameState("waiting for other players");
+    });
+}
+
 getPlayerID = function () {
     return $('#playerid').text();
 };

@@ -34,6 +34,7 @@ namespace OneNightWebolution.Models
         public string Role { get; set; }
         public string Specialist { get; set; }
         public int GameID { get; set; }
+        public int votingForID { get; set; }
         public virtual Game Game { get; set; }
         public Player(string playerName, string connectionID)
         {

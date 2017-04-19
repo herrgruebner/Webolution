@@ -154,6 +154,16 @@ hub.client.addClickToVoteHandlers = function () {
     });
 }
 
+hub.client.setGameStateFromServer = function () {
+    $('#gamestate').text(message);
+}
+
+hub.client.addEndGameButton = function () {
+    $('#endButton').click(function () {
+        hub.server.EndGame(getGameID());
+    });
+}
+
 getPlayerID = function () {
     return $('#playerid').text();
 };

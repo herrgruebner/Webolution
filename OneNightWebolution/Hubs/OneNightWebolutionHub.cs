@@ -53,6 +53,8 @@ namespace OneNightWebolution
                 game = new Game() { PartyName = partyName };
                 db.Games.Add(game);
                 Clients.Caller.ShowStartButton();
+
+                game.LeaderID = player.ID;
             }
             else
             {
@@ -312,9 +314,10 @@ namespace OneNightWebolution
             else
             {
                 Debug.WriteLine("Accusation phase reached");
+                Player leader = pRepo.Get(game.LeaderID);
                 Clients.Group(game.PartyName).addClickToVoteHandlers();
+                Clients.Client(leader.ConnectionID).addEndGameButton();
             }
-           
         }
 
         private void AddVote(int playerID, int selectedID)
@@ -322,6 +325,51 @@ namespace OneNightWebolution
             Player actingPlayer = pRepo.Get(playerID);
             actingPlayer.votingForID = selectedID;
             pRepo.SavePlayerChanges(actingPlayer);
+        }
+
+        private void EndGame(int gameID)
+        {
+            Game game = db.Games.FirstOrDefault(s => s.ID == gameID);
+            Dictionary<int, int> voteDict = new Dictionary<int, int>();
+
+            //Check if everyone has voted
+            foreach(Player player in game.Players)
+            {
+                if(player.votingForID == 0)
+                {
+                    return;
+                }
+
+                if(voteDict.Keys.Contains(player.ID))
+                {
+                    voteDict[player.ID]++;
+                }
+                else
+                {
+                    voteDict[player.ID] = 1;
+                }
+            }
+
+            var toKills = voteDict.Where(x => x.Value == voteDict.Values.Max());
+            Boolean traitorsWin = true;
+            foreach (var toKill in toKills)
+            {
+                Player player = pRepo.Get(toKill.Key);
+
+                if(player.Role == "traitor")
+                {
+                    traitorsWin = false;
+                }
+            }
+
+            if(traitorsWin)
+            {
+                Clients.Group(game.PartyName).setGameStateFromServer("Traitors Win");
+            }
+            else
+            {
+                Clients.Group(game.PartyName).setGameStateFromServer("Rebels Win");
+            }
         }
 
         /// <summary>

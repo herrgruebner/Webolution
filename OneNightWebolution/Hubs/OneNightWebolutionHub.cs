@@ -57,7 +57,7 @@ namespace OneNightWebolution
             }
             else
             {
-                ShowCurrentlyConnectedPlayersOnJoin(partyName); // only run this when 
+                ShowCurrentlyConnectedPlayersOnJoin(partyName); 
             }
             player.Game = game;
             player.GameID = game.ID;

@@ -29,5 +29,11 @@ textarea {
 
 .otherplayercontainer {
     margin: 20px 0 20px 0;
-    background-color: lightblue;
+    background-color: lightgray;
+}
+.traitor {
+    background-color: red;
+}
+.rebel {
+    background-color: blue;
 }

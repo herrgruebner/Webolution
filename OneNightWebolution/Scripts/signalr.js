@@ -33,7 +33,7 @@ hub.client.showPlayerName = function (playerName) {
 };
 
 hub.client.showOtherPlayer = function (otherPlayerName, otherPlayerID) {
-    $('#otherplayers').append('<div id=' + otherPlayerID + ' class="otherplayercontainer">' +
+    $('#otherplayers').append('<div id=' + otherPlayerID + ' class="otherplayercontainer col-md-6">' +
         '<div>' + otherPlayerName + '</div>' +
         '<div class="role">Role: Unknown</div>' +
         '<div class="specialist">Specialist: Unknown</div>' +
@@ -66,6 +66,7 @@ hub.client.showSpecialist = function (specialist) {
 
 hub.client.showOtherSpecialist = function (specialist, playerID) {
     $('#' + playerID).find('.specialist').text(specialist);
+
 };
 
 hub.client.showGameBegun = function () {
@@ -74,7 +75,14 @@ hub.client.showGameBegun = function () {
 
 hub.client.showOtherRole = function (playerID, role) {
     $('#' + playerID).find('.role').text(role);
+    if (role == 'traitor') {
+        $('#' + playerID).addClass('traitor');
+    }
+    if (role == 'rebel') {
+        $('#' + playerID).addClass('rebel');
+    }
 }
+
 
 hub.client.takeTurn = function () {
     setGameState("Your Turn");

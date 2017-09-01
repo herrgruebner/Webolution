@@ -160,7 +160,7 @@ hub.client.showFullTraitorsMessage = function () {
 hub.client.addClickToVoteHandlers = function () {
     $('.otherplayercontainer').on('click', function () {
         var selectedID = $(this).attr('id');
-        hub.server.AddVote(getPlayerID(), selectedID);
+        hub.server.addVote(getPlayerID(), selectedID);
         $('.otherplayercontainer').off('click');
         setGameState("waiting for other players");
     });
@@ -173,7 +173,7 @@ hub.client.setGameStateFromServer = function (message) {
 hub.client.addEndGameButton = function () {
     $('#endButton').removeClass('hidden');
     $('#endButton').click(function () {
-        hub.server.EndGame(getGameID());
+        hub.server.endGame(getGameID());
     });
 }
 
